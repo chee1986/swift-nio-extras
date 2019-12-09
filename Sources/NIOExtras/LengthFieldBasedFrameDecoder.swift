@@ -42,6 +42,7 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
         case two
         case four
         case eight
+        case level2FromSZSE
         
         var length: Int {
             switch self {
@@ -53,6 +54,9 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
                 return 4
             case .eight:
                 return 8
+            }
+            case .level2FromSZSE:
+                return 128
             }
         }
     }
@@ -172,6 +176,9 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
             return buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt32.self).map { Int($0) }
         case .eight:
             return buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt64.self).map { Int($0) }
+        case .level2FromSZSE:
+            buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt32.self)
+            return buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt32.self).map { Int($0)+4 }
         }
     }
 }
