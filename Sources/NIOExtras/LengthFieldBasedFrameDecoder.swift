@@ -148,8 +148,10 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
     ///    - frameLength: The length of the frame data to be read.
     ///
     private func readNextFrame(buffer: inout ByteBuffer, frameLength: Int) throws -> ByteBuffer? {
+        let readerIndex = buffer.readerIndex
+        buffer.moveReaderIndex(to: readerIndex - 8)
         
-        guard let contentsFieldSlice = buffer.readSlice(length: frameLength) else {
+        guard let contentsFieldSlice = buffer.readSlice(length: frameLength + 12) else {
             return nil
         }
         
