@@ -148,10 +148,10 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
     ///    - frameLength: The length of the frame data to be read.
     ///
     private func readNextFrame(buffer: inout ByteBuffer, frameLength: Int) throws -> ByteBuffer? {
-        let readerIndex = buffer.readerIndex
-        buffer.moveReaderIndex(to: readerIndex - 8)
+//        let readerIndex = buffer.readerIndex
+//        buffer.moveReaderIndex(to: readerIndex - 8)
         
-        guard let contentsFieldSlice = buffer.readSlice(length: frameLength + 8) else {
+        guard let contentsFieldSlice = buffer.readSlice(length: frameLength) else {
             return nil
         }
         
@@ -180,7 +180,10 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
             return buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt64.self).map { Int($0) }
         case .level2FromSZSE:
             buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt32.self)
-            return buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt32.self).map { Int($0)+4 }
+            let length = buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt32.self).map { Int($0)+12 }
+            let readerIndex = buffer.readerIndex
+            buffer.moveReaderIndex(to: readerIndex - 8)
+            return length
         }
     }
 }
