@@ -54,12 +54,12 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
                 return 4
             case .eight:
                 return 8
-            }
             case .level2FromSZSE:
                 return 128
             }
         }
     }
+    
     
     ///
     /// The decoder has two distinct sections of data to read.
@@ -70,7 +70,7 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
         case waitingForHeader
         case waitingForFrame(length: Int)
     }
-
+    
     public typealias InboundIn = ByteBuffer
     public typealias InboundOut = ByteBuffer
     
@@ -87,11 +87,11 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
     ///    - lengthFieldEndianness: The endianness of the field specifying the remaining length of the frame.
     ///
     public init(lengthFieldLength: ByteLength, lengthFieldEndianness: Endianness = .big) {
-
+        
         // The value contained in the length field must be able to be represented by an integer type on the platform.
         // ie. .eight == 64bit which would not fit into the Int type on a 32bit platform.
         precondition(lengthFieldLength.length <= Int.bitWidth/8)
-            
+        
         self.lengthFieldLength = lengthFieldLength
         self.lengthFieldEndianness = lengthFieldEndianness
     }
@@ -111,7 +111,7 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
         }
         
         context.fireChannelRead(self.wrapInboundOut(frameBuffer))
-
+        
         return .continue
     }
     
@@ -123,7 +123,7 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
         }
         return .needMoreData
     }
-
+    
     ///
     /// Attempts to read the header data. Updates the status is successful.
     ///
@@ -131,12 +131,12 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
     ///    - buffer: The buffer containing the integer frame length.
     ///
     private func readNextLengthFieldToState(buffer: inout ByteBuffer) throws {
-
+        
         // Convert the length field to an integer specifying the length
         guard let lengthFieldValue = self.readFrameLength(for: &buffer) else {
             return
         }
-
+        
         self.readState = .waitingForFrame(length: lengthFieldValue)
     }
     
@@ -152,12 +152,12 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
         guard let contentsFieldSlice = buffer.readSlice(length: frameLength) else {
             return nil
         }
-
+        
         self.readState = .waitingForHeader
         
         return contentsFieldSlice
     }
-
+    
     ///
     /// Decodes the specified region of the buffer into an unadjusted frame length. The default implementation is
     /// capable of decoding the specified region into an unsigned 8/16/32/64 bit integer.
@@ -166,7 +166,7 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
     ///    - buffer: The buffer containing the integer frame length.
     ///
     private func readFrameLength(for buffer: inout ByteBuffer) -> Int? {
-
+        
         switch self.lengthFieldLength {
         case .one:
             return buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt8.self).map { Int($0) }
