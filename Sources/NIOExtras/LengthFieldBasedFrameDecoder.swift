@@ -103,12 +103,9 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
         guard case .waitingForFrame(let frameLength) = self.readState else {
             return .needMoreData
         }
-        print("frameLength=\(frameLength)")
         guard let frameBuffer = try self.readNextFrame(buffer: &buffer, frameLength: frameLength) else {
             return .needMoreData
         }
-        
-        print("tt")
         context.fireChannelRead(self.wrapInboundOut(frameBuffer))
         
         return .continue
@@ -178,8 +175,10 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
         case .eight:
             return buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt64.self).map { Int($0) }
         case .level2FromSZSE:
-            buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt32.self)
+            print("1=\(buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt32.self))")
+            
             let length = buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt32.self).map { Int($0)+12 }
+            print("2=\(length)")
             if length != nil {
                 let readerIndex = buffer.readerIndex
                 buffer.moveReaderIndex(to: readerIndex - 8)
