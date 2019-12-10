@@ -110,6 +110,7 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
             return .needMoreData
         }
         
+        print("xx")
         context.fireChannelRead(self.wrapInboundOut(frameBuffer))
         
         return .continue
