@@ -97,15 +97,13 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
     }
     
     public func decode(context: ChannelHandlerContext, buffer: inout ByteBuffer) throws -> DecodingState {
-        print("xx")
         if case .waitingForHeader = self.readState {
             try self.readNextLengthFieldToState(buffer: &buffer)
         }
-        print("yy")
         guard case .waitingForFrame(let frameLength) = self.readState else {
             return .needMoreData
         }
-        print("zz")
+        print("frameLength=\(frameLength)")
         guard let frameBuffer = try self.readNextFrame(buffer: &buffer, frameLength: frameLength) else {
             return .needMoreData
         }
