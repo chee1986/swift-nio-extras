@@ -175,13 +175,15 @@ public final class LengthFieldBasedFrameDecoder: ByteToMessageDecoder {
         case .eight:
             return buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt64.self).map { Int($0) }
         case .level2FromSZSE:
-            print("1=\(buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt32.self))")
-            
+            let msgType = buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt32.self)
             let length = buffer.readInteger(endianness: self.lengthFieldEndianness, as: UInt32.self).map { Int($0)+12 }
-            print("2=\(length)")
+            if msgType != nil {
+                let readerIndex = buffer.readerIndex
+                buffer.moveReaderIndex(to: readerIndex - 4)
+            }
             if length != nil {
                 let readerIndex = buffer.readerIndex
-                buffer.moveReaderIndex(to: readerIndex - 8)
+                buffer.moveReaderIndex(to: readerIndex - 4)
             }
             return length
         }
